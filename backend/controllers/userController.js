@@ -2,11 +2,14 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/userModels");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const Token = require("../models/tokenModel");
+const crypto = require("crypto");
+const sendEmail = require ("../utils/sendEmail")
+
 
 const generateToken = (id) => {
     return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1d"});
 };
-
 
 // Register User
 const registerUser = asyncHandler(async (req, res) => {
@@ -229,7 +232,93 @@ const changePassword = asyncHandler (async (req, res) => {
 });
 
 const forgotPassword = asyncHandler (async (req, res) => {
-    res.send("Forgot Password");
+    // res.send("Forgot Password");
+    const {email} = req.body;
+    const user = await User.findOne({email});
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    } 
+
+    // Delete Reset Token if it Exists in DB
+    let token = await Token.findOne({userId: user._id});
+    if (token) {
+        await token.deleteOne()
+    }
+
+    // Create Reset Token
+    let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
+    console.log(resetToken);
+
+    // Hash Token Before Saving to DB
+    const hashToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    // Save Token to DB
+    await new Token({
+        userId: user._id,
+        token: hashToken,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 30 * (60 * 1000), // 30 mins
+    }).save();
+
+    // Construct Reset URL
+    const resetURL = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+
+    // Reset Email
+    const message = `
+        <h2>Hello ${user.name}</h2>
+        <p>Pease use the url below to reset your password</p>
+        <p>The link is valid only 30 minuts</p>
+        
+        <a href=${resetURL} clicktracking=off>${resetURL}</a>
+
+        <p>Regards</p>
+        <p>Inventory Manager</p>
+    `;
+    const subject = "Password Reset Request -- Inventory Manager";
+    const send_to = user.email;
+    const sent_from = process.env.EMAIL_USER;
+
+    try {
+        await sendEmail(subject, message, send_to, sent_from);
+        res.status(200).json({success: true,message: "Reset Email Sent"} )
+    } catch (error) {
+        res.status(500);
+        throw new Error("Email Not Sent, please try again");
+    };
+
+
+});
+
+const resetPassword = asyncHandler (async (req, res) => {
+    // res.send("Reset Password")
+    const {password} = req.body;
+    const {resetToken} = req.params;
+
+    // Hash Token Before then compare to Token in DB
+    const hashToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    // Find Token in DB
+    const userToken = await Token.findOne({
+        token: hashToken,
+        expiresAt: {$gt: Date.now()},
+    })
+
+    if (!userToken) {
+        res.status(404);
+        throw new Error("Invalide or expired token");
+    }
+
+    // Find User
+    const user = await User.findOne({_id: userToken.userId});
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({
+        massage: "Password reset successfully, you can now login with you new password"
+    });
 });
 
 module.exports = {
@@ -241,4 +330,5 @@ module.exports = {
     updateUser,
     changePassword,
     forgotPassword,
+    resetPassword,
 };
