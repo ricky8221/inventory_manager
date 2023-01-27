@@ -36,5 +36,17 @@ export const loginUser = async (userData) => {
             error.Response && error.Response.data && error.Response.data.message
         ) || error.message || error.toString();
         toast.error(message);
-    }
+    }    
+};
+
+// Logout User
+export const logoutUser = async () => {
+    try {
+        await axios.get(`${BACKEND_URL}/api/users/logout`, { withCredentials: true })
+    } catch (error) {
+        const message = (
+            error.Response && error.Response.data && error.Response.data.message
+        ) || error.message || error.toString();
+        toast.error(message);
+    }    
 };
