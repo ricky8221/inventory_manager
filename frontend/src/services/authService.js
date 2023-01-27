@@ -28,7 +28,7 @@ export const loginUser = async (userData) => {
     try {
         const Response = await axios.post(`${BACKEND_URL}/api/users/login`, userData, { withCredentials: true })
         if (Response.statusText === "OK") {
-            toast.success("Login Succesfully!")
+            toast.success("Login Succesfully! You can now log in with your new password")
         };
         return Response.data;
     } catch (error) {
