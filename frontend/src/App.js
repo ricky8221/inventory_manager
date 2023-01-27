@@ -29,7 +29,7 @@ function App() {
     }
     loginStatus();
   }, [dispatch]);
-  
+
   return (
     <BrowserRouter>
       <ToastContainer />
@@ -41,13 +41,16 @@ function App() {
         <Route path='/resetpassword/:resetToken' element={<Reset />} />
 
 
-        <Route path='/dashboard' element={
-          <Sidebar>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </Sidebar>
-        } />
+        <Route
+          path="/dashboard"
+          element={
+            <Sidebar>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </Sidebar>
+          }
+        />
 
 
       </Routes>
