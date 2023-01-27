@@ -22,7 +22,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/forgot' element={<Forgot />} />
-        <Route path='/reset/:resetToken' element={<Reset />} />
+        <Route path='/resetpassword/:resetToken' element={<Reset />} />
 
 
         <Route path='/dashboard' element={
