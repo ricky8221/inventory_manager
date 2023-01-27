@@ -34,6 +34,7 @@ const Register = () => {
         e.preventDefault();
         // console.log(formData);
 
+        // Validation
         if(!name || !email || !password || !password2) {
             return toast.error("All field are required");
         };
@@ -62,7 +63,7 @@ const Register = () => {
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
-            console.log(error.message);
+            // console.log(error.message);
         }
     }
 
