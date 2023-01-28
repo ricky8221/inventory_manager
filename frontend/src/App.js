@@ -14,6 +14,7 @@ import { getLoginStatus } from "./services/authService";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { SET_LOGIN } from "./redux/features/auth/authSlice";
+import AddProduct from "./pages/addProduct/AddProduct";
 
 
 
@@ -47,6 +48,17 @@ function App() {
             <Sidebar>
               <Layout>
                 <Dashboard />
+              </Layout>
+            </Sidebar>
+          }
+        />
+
+        <Route
+          path="/add-product"
+          element={
+            <Sidebar>
+              <Layout>
+                <AddProduct />
               </Layout>
             </Sidebar>
           }
