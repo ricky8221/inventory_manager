@@ -10,10 +10,27 @@ import Home from "./pages/Home/Home";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { getLoginStatus } from "./services/authService";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { SET_LOGIN } from "./redux/features/auth/authSlice";
+import AddProduct from "./pages/addProduct/AddProduct";
+
+
 
 axios.defaults.withCredentials = true;
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    async function loginStatus() {
+      const status = await getLoginStatus();
+      dispatch(SET_LOGIN(status));
+    }
+    loginStatus();
+  }, [dispatch]);
+
   return (
     <BrowserRouter>
       <ToastContainer />
@@ -25,13 +42,27 @@ function App() {
         <Route path='/resetpassword/:resetToken' element={<Reset />} />
 
 
-        <Route path='/dashboard' element={
-          <Sidebar>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </Sidebar>
-        } />
+        <Route
+          path="/dashboard"
+          element={
+            <Sidebar>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </Sidebar>
+          }
+        />
+
+        <Route
+          path="/add-product"
+          element={
+            <Sidebar>
+              <Layout>
+                <AddProduct />
+              </Layout>
+            </Sidebar>
+          }
+        />
 
 
       </Routes>
